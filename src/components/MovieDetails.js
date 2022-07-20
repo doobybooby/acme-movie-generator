@@ -1,37 +1,33 @@
-import React, { Component } from 'react'
+import React, { useState } from 'react'
 import { connect } from 'react-redux'
 import axios from 'axios'
+import { useNavigate, useParams } from 'react-router-dom'
+import {deleteMovie } from '../store'
 
-class MovieDetails extends Component{
-  constructor(props) {
-    super(props)
-    this.deleteMovie = this.deleteMovie.bind(this)
-  }
-  
-  async deleteMovie(){
-    console.log(this.props)
-    // await axios.delete(`/api/movies/${id}`)
-  }
-  
-  render(){
-    const { movies } = this.props
-    const { deleteMovie } = this
+function MovieDetails ({movies, deleteMovie}){
+  const navigate = useNavigate()
+  const params = useParams()
+  const movie = movies.filter( movie => movie.id === params.id*1 )
 
-    return (
-      <>
-        <button onClick={deleteMovie}>DELETE THIS MOVIE</button>
-        
-      </>
-    )
-
-  }
+  return (
+    <>
+      <button onClick={()=>{
+        deleteMovie(params.id)
+        console.log('delete, than navigate')
+        }} >REMOVE FROM LIST</button>
+      <div>
+        <h3>{ movie[0] ? movie[0].name : 'loading name'}</h3>  
+        <h3>{ movie[0] ? movie[0].starRating : 'loading rating'}</h3>  
+      </div>  
+    </>
+  )
 }
 
 export default connect(
   state => state,
   dispatch => {
     return {
-      createMovie: ()=> {
+      deleteMovie: ()=> {
         dispatch(deleteMovie())
       }
     }

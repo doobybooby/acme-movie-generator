@@ -21,9 +21,13 @@ const App = connect(
   componentDidMount(){
     this.props.loadData()
   }
-  componentDidUpdate(){
-    this.props.loadData()
-
+  componentDidUpdate(prevProps){
+    if(prevProps.movies.length !== this.props.movies.length){
+      this.props.loadData()
+    }
+    // if(prevProps.movies !== this.props.movies.sort((a,b)=> b.starRating-a.starRating)){
+    //   this.props.loadData()
+    // }
   }
   render(){
     const {movies} = this.props

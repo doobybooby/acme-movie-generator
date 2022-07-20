@@ -1,54 +1,43 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
-import { createMovie } from '../store'
-import { faker } from '@faker-js/faker'
+import { createMovie, decrementRating, deleteMovie, incrementRating } from '../store'
+import { Link } from 'react-router-dom'
 import axios from 'axios'
-import { Link, Outlet } from 'react-router-dom'
 
 class Movies extends Component{
   constructor(props) {
     super(props)
-    this.addMovie = this.addMovie.bind(this)
-    this.handleClick = this.handleClick.bind(this)
   }
   
-  async addMovie(){
-    // createMovie()
-    const randomName = faker.commerce.productName()
-    await axios.post('/api/movies', {
-      name: randomName
-    })
-  }
-  
-  async deleteMovie(){
-    const randomName = faker.commerce.productName()
-    await axios.delete('/api/movies', {
-      name: randomName
-    })
-  }
-
-  async handleClick(){
-    createMovie()
-    console.log('create a mopvie')
+  componentDidUpdate(prevProps){
+    console.log(' can we perform compoentdidupdate here? ', prevProps.movies, this.props.movies.sort((a,b)=> b.starRating-a.starRating))
   }
 
   render(){
-    const { movies } = this.props
-    const { addMovie, handleClick, deleteMovie } = this
+    const { movies, createMovie, deleteMovie, incrementRating, decrementRating } = this.props
 
     return (
       <>
-        <button onClick={addMovie}>ADD A MOVIE TO THE LIST</button>
+        <button onClick={createMovie}>ADD A MOVIE TO THE LIST</button>
         <ul>
           {
             movies.map(movie => 
+              movie?
               <li key={movie.id}>
                 <Link to={`/movies/${movie.id}`}>{movie.name}</Link>
-                <h5>{movie.starRating}</h5>
-                <button >-</button>
-                <button >+</button>
-                <button onClick={deleteMovie}>X</button>
-              </li>
+                <h5>RATING:{movie.starRating}</h5>
+                <button onClick={async()=>{
+                  incrementRating(movie.id)
+                  // await axios.put(`/api/movies/${movie.id}`)
+                }}>+</button>
+                <button onClick={()=> {
+                  decrementRating(movie.id)
+                }}>-</button>
+                <button onClick={()=>{
+                    deleteMovie(movie.id)
+                  }}>x</button>
+              </li>:
+              <h1>loading</h1>
             )
           }
         </ul>
@@ -64,6 +53,15 @@ export default connect(
     return {
       createMovie: ()=> {
         dispatch(createMovie())
+      },
+      deleteMovie: (id)=> {
+        dispatch(deleteMovie(id))
+      },
+      incrementRating: (id)=> {
+        dispatch(incrementRating(id))
+      },
+      decrementRating: (id) => {
+        dispatch(decrementRating(id))
       }
     }
   }

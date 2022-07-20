@@ -1,6 +1,7 @@
 const express = require('express');
 const app = express();
 const path = require('path');
+const { send } = require('process');
 const db = require('./db')
 const { Movie } = db
 
@@ -11,7 +12,11 @@ app.get('/', (req, res)=> res.sendFile(path.join(__dirname, 'index.html')));
 
 app.get('/api/movies', async(req,res,next)=>{
   try{
-    res.send(await Movie.findAll())
+    res.send(await Movie.findAll({
+      order:[
+        ['starRating', 'DESC']
+      ]
+    }))
   }
   catch(er){
     next(er)
@@ -27,10 +32,32 @@ app.post('/api/movies', async(req,res,next)=>{
   }
 })
 
+app.put('/api/movies/:id/decrement', async(req,res,next)=> {
+  try{
+    const movie = await Movie.findByPk(req.params.id)
+    await movie.decrement('starRating', {by: 1})
+    res.status(204).send(movie)
+  }
+  catch(er){
+    next(er)
+  }
+})
+
+app.put('/api/movies/:id/increment', async(req,res,next)=> {
+  try{
+    const movie = await Movie.findByPk(req.params.id)
+    await movie.increment('starRating', {by: 1})
+    res.status(204).send(movie)
+  }
+  catch(er){
+    next(er)
+  }
+})
+
 app.delete('/api/movies/:id', async(req,res,next)=>{
   try{
     const movie = await Movie.findByPk(req.params.id)
-    movie.destroy()
+    await movie.destroy()
     res.sendStatus(204).redirect('/')
   }
   catch(er){
